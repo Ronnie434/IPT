@@ -113,7 +113,7 @@ class PortfolioAnalyzer:
         """Aggressively clear all possible session data"""
         try:
             # Force logout multiple times to be sure
-            for _ in range(3):
+            for _ in range(5):
                 try:
                     r.logout()
                 except:
@@ -121,12 +121,17 @@ class PortfolioAnalyzer:
             
             # Clear session files in multiple possible locations
             import glob
+            import shutil
             possible_locations = [
                 './',
                 '/tmp/',
                 os.path.expanduser('~/.'),
                 '/app/',
-                '/home/runner/'
+                '/home/runner/',
+                '/home/runner/.cache/',
+                './.cache/',
+                './temp/',
+                '/var/tmp/'
             ]
             
             session_patterns = [
@@ -134,17 +139,27 @@ class PortfolioAnalyzer:
                 '*robinhood*',
                 '.robinhood*',
                 'rh_*',
-                '*auth*'
+                '*auth*',
+                '*session*',
+                '*token*'
             ]
             
             for location in possible_locations:
+                if not os.path.exists(location):
+                    continue
                 for pattern in session_patterns:
                     try:
                         for file_path in glob.glob(os.path.join(location, pattern)):
-                            if os.path.isfile(file_path) and ('robinhood' in file_path.lower() or file_path.endswith('.pickle')):
+                            if os.path.isfile(file_path):
                                 try:
                                     os.remove(file_path)
                                     print(f"Removed session file: {file_path}")
+                                except:
+                                    pass
+                            elif os.path.isdir(file_path) and 'robinhood' in file_path.lower():
+                                try:
+                                    shutil.rmtree(file_path)
+                                    print(f"Removed session directory: {file_path}")
                                 except:
                                     pass
                     except:
@@ -152,13 +167,31 @@ class PortfolioAnalyzer:
                         
             # Clear environment variables that might cache auth
             env_vars_to_clear = [key for key in os.environ.keys() 
-                               if any(term in key.lower() for term in ['robinhood', 'rh_', 'auth', 'token'])]
+                               if any(term in key.lower() for term in ['robinhood', 'rh_', 'auth', 'token', 'session'])]
             
             for var in env_vars_to_clear:
                 try:
                     del os.environ[var]
+                    print(f"Cleared env var: {var}")
                 except:
                     pass
+            
+            # Force clear any module-level variables in robin_stocks
+            try:
+                import sys
+                for module_name in list(sys.modules.keys()):
+                    if 'robin_stocks' in module_name:
+                        module = sys.modules[module_name]
+                        # Clear common session variables
+                        for attr in ['access_token', 'refresh_token', 'session', '_session', 'logged_in']:
+                            if hasattr(module, attr):
+                                try:
+                                    delattr(module, attr)
+                                    print(f"Cleared module attribute: {module_name}.{attr}")
+                                except:
+                                    pass
+            except:
+                pass
                     
         except Exception as e:
             pass  # Continue even if clearing fails
