@@ -7,6 +7,12 @@ import os
 from portfolio_analyzer import PortfolioAnalyzer
 from utils import format_currency, format_percentage, safe_float
 
+# Production configuration
+if os.environ.get('RENDER'):
+    # Running on Render
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    st.set_option('deprecation.showfileUploaderEncoding', False)
+
 # Page configuration
 st.set_page_config(
     page_title="Robinhood Portfolio Analyzer",
