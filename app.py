@@ -22,6 +22,8 @@ if 'analyzer' not in st.session_state:
     st.session_state.analyzer = None
 if 'last_refresh' not in st.session_state:
     st.session_state.last_refresh = None
+if 'user_confirmed' not in st.session_state:
+    st.session_state.user_confirmed = False
 
 def login_form():
     """Display login form for Robinhood credentials"""
@@ -78,6 +80,7 @@ def login_form():
                         st.session_state.logged_in = True
                         st.session_state.analyzer = analyzer
                         st.session_state.username = username
+                        st.session_state.user_confirmed = False  # Need user confirmation
                         st.success("✅ Successfully logged in!")
                         st.rerun()
                     else:
@@ -92,6 +95,82 @@ def login_form():
     st.info("🔒 **Security Notice**: Your credentials are only used for this session and are not stored anywhere.")
     
     return False
+
+def user_confirmation_popup():
+    """Display user confirmation popup with current user info"""
+    st.title("🔐 User Account Confirmation")
+    
+    try:
+        user_info = st.session_state.analyzer.get_current_user_info()
+        
+        if user_info:
+            st.warning("⚠️ **Please confirm this is your account before proceeding**")
+            
+            # Display user information in a nice format
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.info(f"""
+                **Account Details:**
+                - **Name:** {user_info.get('first_name', 'Unknown')} {user_info.get('last_name', '')}
+                - **Email:** {user_info.get('email', 'Unknown')}
+                """)
+            
+            with col2:
+                st.info(f"""
+                **Login Info:**
+                - **Username:** {user_info.get('username', 'Unknown')}
+                - **Account ID:** {user_info.get('account_id', 'Unknown')}
+                """)
+            
+            st.markdown("---")
+            
+            # Confirmation buttons
+            col1, col2, col3 = st.columns([1, 1, 2])
+            
+            with col1:
+                if st.button("✅ This is my account", type="primary", use_container_width=True):
+                    st.session_state.user_confirmed = True
+                    st.success("Account confirmed! Redirecting to dashboard...")
+                    st.rerun()
+            
+            with col2:
+                if st.button("❌ Wrong account", type="secondary", use_container_width=True):
+                    # Clear session and logout
+                    if st.session_state.analyzer:
+                        st.session_state.analyzer.logout()
+                    
+                    st.session_state.logged_in = False
+                    st.session_state.user_confirmed = False
+                    st.session_state.analyzer = None
+                    
+                    st.error("Logged out. Please login with the correct credentials.")
+                    st.rerun()
+            
+            with col3:
+                st.markdown("**Make sure this is your account to protect your privacy and security.**")
+        
+        else:
+            st.error("Unable to retrieve user information. Please try logging in again.")
+            if st.button("🔄 Retry Login"):
+                if st.session_state.analyzer:
+                    st.session_state.analyzer.logout()
+                
+                st.session_state.logged_in = False
+                st.session_state.user_confirmed = False 
+                st.session_state.analyzer = None
+                st.rerun()
+    
+    except Exception as e:
+        st.error(f"Error displaying user confirmation: {str(e)}")
+        if st.button("🔄 Retry Login"):
+            if st.session_state.analyzer:
+                st.session_state.analyzer.logout()
+            
+            st.session_state.logged_in = False
+            st.session_state.user_confirmed = False
+            st.session_state.analyzer = None
+            st.rerun()
 
 def display_portfolio_summary():
     """Display portfolio summary metrics"""
@@ -462,8 +541,12 @@ def display_orders():
 def main():
     """Main application function"""
     
+    # Check authentication state
     if not st.session_state.logged_in:
         login_form()
+        return
+    elif not st.session_state.user_confirmed:
+        user_confirmation_popup()
         return
     
     # Main application layout

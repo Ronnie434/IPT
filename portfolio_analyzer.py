@@ -12,6 +12,7 @@ class PortfolioAnalyzer:
         self._logged_in = False
         self._cache = {}
         self._cache_timeout = 300  # 5 minutes
+        self._current_user_info = {}
         
     def login(self, username: str, password: str, mfa_code: Optional[str] = None) -> bool:
         """
@@ -74,6 +75,18 @@ class PortfolioAnalyzer:
                     user_name = "Unknown"
                     if isinstance(profile, dict) and 'first_name' in profile:
                         user_name = profile['first_name']
+                    
+                    # Store comprehensive user info for verification
+                    self._current_user_info = {
+                        'username': username,
+                        'first_name': profile.get('first_name', 'Unknown') if isinstance(profile, dict) else 'Unknown',
+                        'last_name': profile.get('last_name', '') if isinstance(profile, dict) else '',
+                        'email': profile.get('email', username) if isinstance(profile, dict) else username,
+                        'account_id': account.get('account_number', 'Unknown') if isinstance(account, dict) else 'Unknown',
+                        'profile': profile,
+                        'account': account
+                    }
+                    
                     print(f"Login successful for user: {user_name}")
                     return True
                 else:
@@ -99,11 +112,54 @@ class PortfolioAnalyzer:
             self._clear_all_sessions()
             self._logged_in = False
             self._cache.clear()
+            self._current_user_info = {}
                         
         except Exception as e:
             # Don't show error for logout - just ensure we clear local state
             self._logged_in = False
             self._cache.clear()
+            self._current_user_info = {}
+    
+    def get_current_user_info(self) -> Dict[str, Any]:
+        """
+        Get current logged in user information
+        
+        Returns:
+            Dict containing user information
+        """
+        try:
+            if not self._logged_in:
+                return {}
+                
+            if self._current_user_info:
+                return self._current_user_info
+            
+            # Fallback: fetch fresh profile if not stored
+            profile = r.profiles.load_basic_profile()
+            account = r.profiles.load_account_profile()
+            
+            if profile and account:
+                self._current_user_info = {
+                    'username': 'Current User',
+                    'first_name': profile.get('first_name', 'Unknown') if isinstance(profile, dict) else 'Unknown',
+                    'last_name': profile.get('last_name', '') if isinstance(profile, dict) else '',
+                    'email': profile.get('email', 'Unknown') if isinstance(profile, dict) else 'Unknown',
+                    'account_id': account.get('account_number', 'Unknown') if isinstance(account, dict) else 'Unknown',
+                    'profile': profile,
+                    'account': account
+                }
+                return self._current_user_info
+            
+            return {}
+            
+        except Exception as e:
+            print(f"Error getting user info: {str(e)}")
+            return {}
+    
+    def clear_session(self):
+        """Clear session data - alias for _clear_all_sessions"""
+        self._clear_all_sessions()
+        self._current_user_info = {}
     
     def clear_cache(self):
         """Clear the data cache to force refresh"""
