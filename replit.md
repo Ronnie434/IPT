@@ -97,3 +97,13 @@ The application prioritizes user security by avoiding credential storage while p
 - Added extensive file system cleanup for session persistence files
 
 The authentication system now properly validates credentials and prevents unauthorized access to account data.
+
+### Stock-Level Detail Analysis Feature
+- **Individual Stock Tracking**: Added comprehensive tracking at individual stock level with transaction history
+- **Three-Column Layout**: Implemented Equity Transactions, Dividend History, and Summary columns matching user requirements
+- **Transaction Details**: Shows quantity, price, amount, and dates for all equity transactions
+- **Dividend Tracking**: Displays dividend payments with quantities, amounts, and payment dates
+- **Comprehensive Metrics**: Calculates total profit, net quantity, average prices, and dividend totals
+- **Interactive Selection**: Added stock selector for detailed analysis of any holding in the portfolio
+
+This enhancement provides the detailed stock-level analysis requested, showing complete transaction and dividend history for each individual stock position.

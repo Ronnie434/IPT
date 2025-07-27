@@ -423,6 +423,117 @@ class PortfolioAnalyzer:
             st.error(f"Error fetching all orders: {str(e)}")
             return []
     
+    def get_stock_orders_by_symbol(self, symbol: str, force_refresh: bool = False) -> List[Dict[str, Any]]:
+        """
+        Get all orders for a specific stock symbol
+        
+        Args:
+            symbol: Stock symbol to filter by
+            force_refresh: Force refresh of cached data
+            
+        Returns:
+            List of orders for the specified symbol
+        """
+        all_orders = self.get_all_orders(force_refresh)
+        
+        # Filter orders by symbol
+        symbol_orders = [order for order in all_orders if order.get('symbol', '').upper() == symbol.upper()]
+        
+        # Sort by date (newest first)
+        symbol_orders.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+        
+        return symbol_orders
+    
+    def get_stock_dividends_by_symbol(self, symbol: str, force_refresh: bool = False) -> List[Dict[str, Any]]:
+        """
+        Get all dividends for a specific stock symbol
+        
+        Args:
+            symbol: Stock symbol to filter by
+            force_refresh: Force refresh of cached data
+            
+        Returns:
+            List of dividends for the specified symbol
+        """
+        all_dividends = self.get_dividends(force_refresh)
+        
+        # Filter dividends by symbol
+        symbol_dividends = [div for div in all_dividends if div.get('symbol', '').upper() == symbol.upper()]
+        
+        # Sort by date (newest first)
+        symbol_dividends.sort(key=lambda x: x.get('paid_at', ''), reverse=True)
+        
+        return symbol_dividends
+    
+    def get_stock_summary(self, symbol: str, force_refresh: bool = False) -> Dict[str, Any]:
+        """
+        Get comprehensive summary for a specific stock
+        
+        Args:
+            symbol: Stock symbol
+            force_refresh: Force refresh of cached data
+            
+        Returns:
+            Dict containing comprehensive stock data
+        """
+        try:
+            self._check_login()
+            
+            # Get current holdings data
+            holdings = self.get_holdings(force_refresh)
+            stock_holding = holdings.get(symbol.upper(), {})
+            
+            # Get transaction history
+            orders = self.get_stock_orders_by_symbol(symbol, force_refresh)
+            
+            # Get dividend history
+            dividends = self.get_stock_dividends_by_symbol(symbol, force_refresh)
+            
+            # Calculate additional metrics
+            total_bought_quantity = sum(float(order.get('quantity', 0)) 
+                                      for order in orders 
+                                      if order.get('state') == 'filled' and order.get('side') == 'buy')
+            
+            total_sold_quantity = sum(float(order.get('quantity', 0)) 
+                                    for order in orders 
+                                    if order.get('state') == 'filled' and order.get('side') == 'sell')
+            
+            total_dividend_amount = sum(float(div.get('amount', 0)) for div in dividends)
+            
+            # Calculate average buy price from filled buy orders
+            buy_orders = [order for order in orders 
+                         if order.get('state') == 'filled' and order.get('side') == 'buy']
+            
+            if buy_orders:
+                total_cost = sum(float(order.get('price', 0)) * float(order.get('quantity', 0)) 
+                               for order in buy_orders)
+                total_shares = sum(float(order.get('quantity', 0)) for order in buy_orders)
+                calculated_avg_price = total_cost / total_shares if total_shares > 0 else 0
+            else:
+                calculated_avg_price = 0
+            
+            return {
+                'symbol': symbol.upper(),
+                'current_holding': stock_holding,
+                'orders': orders,
+                'dividends': dividends,
+                'metrics': {
+                    'total_bought_quantity': total_bought_quantity,
+                    'total_sold_quantity': total_sold_quantity,
+                    'net_quantity': total_bought_quantity - total_sold_quantity,
+                    'total_dividend_amount': total_dividend_amount,
+                    'dividend_count': len(dividends),
+                    'calculated_avg_price': calculated_avg_price,
+                    'total_orders': len(orders),
+                    'buy_orders': len([o for o in orders if o.get('side') == 'buy']),
+                    'sell_orders': len([o for o in orders if o.get('side') == 'sell'])
+                }
+            }
+            
+        except Exception as e:
+            st.error(f"Error getting stock summary for {symbol}: {str(e)}")
+            return {}
+    
     def _get_symbol_from_instrument(self, instrument_url: str) -> str:
         """
         Extract symbol from instrument URL

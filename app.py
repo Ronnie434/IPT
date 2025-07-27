@@ -140,13 +140,16 @@ def display_portfolio_summary():
         st.error(f"Error loading portfolio summary: {str(e)}")
 
 def display_holdings():
-    """Display current holdings in a detailed table"""
+    """Display current holdings with option for detailed view"""
     try:
         holdings = st.session_state.analyzer.get_holdings()
         
         if not holdings:
             st.warning("No holdings data available")
             return
+        
+        # Holdings overview
+        st.subheader("📈 Portfolio Holdings")
         
         # Convert holdings to DataFrame for better display
         holdings_data = []
@@ -166,15 +169,16 @@ def display_holdings():
         
         if not df.empty:
             # Format the DataFrame for display
-            df['Average Cost'] = df['Average Cost'].apply(format_currency)
-            df['Current Price'] = df['Current Price'].apply(format_currency)
-            df['Market Value'] = df['Market Value'].apply(format_currency)
-            df['Equity'] = df['Equity'].apply(format_currency)
-            df['Percent Change'] = df['Percent Change'].apply(format_percentage)
-            df['Total Return'] = df['Total Return'].apply(format_currency)
+            display_df = df.copy()
+            display_df['Average Cost'] = display_df['Average Cost'].apply(format_currency)
+            display_df['Current Price'] = display_df['Current Price'].apply(format_currency)
+            display_df['Market Value'] = display_df['Market Value'].apply(format_currency)
+            display_df['Equity'] = display_df['Equity'].apply(format_currency)
+            display_df['Percent Change'] = display_df['Percent Change'].apply(format_percentage)
+            display_df['Total Return'] = display_df['Total Return'].apply(format_currency)
             
             st.dataframe(
-                df,
+                display_df,
                 use_container_width=True,
                 hide_index=True,
                 column_config={
@@ -183,6 +187,20 @@ def display_holdings():
                     "Percent Change": st.column_config.TextColumn("% Change"),
                 }
             )
+            
+            # Stock selection for detailed view
+            st.subheader("🔍 Stock Detail Analysis")
+            
+            # Create selectbox with stock symbols
+            symbols = [row['Symbol'] for row in holdings_data]
+            selected_symbol = st.selectbox(
+                "Select a stock for detailed analysis:",
+                options=symbols,
+                help="Choose a stock to see detailed transaction history, dividends, and analytics"
+            )
+            
+            if selected_symbol:
+                display_stock_details(selected_symbol)
             
             # Portfolio allocation chart
             if len(holdings_data) > 1:
@@ -249,6 +267,135 @@ def display_dividends():
             
     except Exception as e:
         st.error(f"Error loading dividend data: {str(e)}")
+
+def display_stock_details(symbol: str):
+    """Display detailed analysis for a specific stock"""
+    try:
+        # Get comprehensive stock data
+        stock_data = st.session_state.analyzer.get_stock_summary(symbol)
+        
+        if not stock_data:
+            st.error(f"No data available for {symbol}")
+            return
+        
+        st.markdown(f"### 📊 {symbol} - Detailed Analysis")
+        
+        # Display summary metrics
+        metrics = stock_data.get('metrics', {})
+        current_holding = stock_data.get('current_holding', {})
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric(
+                "Current Equity",
+                format_currency(safe_float(current_holding.get('equity', 0)))
+            )
+        
+        with col2:
+            st.metric(
+                "Total Dividends",
+                format_currency(metrics.get('total_dividend_amount', 0))
+            )
+        
+        with col3:
+            st.metric(
+                "Total Quantity",
+                f"{metrics.get('net_quantity', 0):.4f}"
+            )
+        
+        with col4:
+            total_profit = safe_float(current_holding.get('equity', 0)) + metrics.get('total_dividend_amount', 0) - (metrics.get('calculated_avg_price', 0) * metrics.get('net_quantity', 0))
+            st.metric(
+                "Total Profit",
+                format_currency(total_profit)
+            )
+        
+        # Create three columns like in your screenshot
+        col_equity, col_dividend, col_summary = st.columns([1, 1, 1])
+        
+        with col_equity:
+            st.markdown("#### 📈 Equity Transactions")
+            orders = stock_data.get('orders', [])
+            filled_orders = [o for o in orders if o.get('state') == 'filled']
+            
+            if filled_orders:
+                equity_data = []
+                for order in filled_orders:
+                    qty = safe_float(order.get('quantity', 0))
+                    price = safe_float(order.get('price', 0))
+                    amount = qty * price
+                    date = order.get('created_at', '')[:10] if order.get('created_at') else 'N/A'
+                    
+                    equity_data.append({
+                        'Quantity': qty,
+                        'Price': price,
+                        'Amount': amount,
+                        'Date': date
+                    })
+                
+                equity_df = pd.DataFrame(equity_data)
+                equity_df['Price'] = equity_df['Price'].apply(lambda x: f"${x:.2f}")
+                equity_df['Amount'] = equity_df['Amount'].apply(format_currency)
+                
+                st.dataframe(
+                    equity_df,
+                    use_container_width=True,
+                    hide_index=True,
+                    height=300
+                )
+            else:
+                st.info("No equity transactions found")
+        
+        with col_dividend:
+            st.markdown("#### 💰 Dividend History")
+            dividends = stock_data.get('dividends', [])
+            
+            if dividends:
+                dividend_data = []
+                for div in dividends:
+                    dividend_data.append({
+                        'Quantity': safe_float(div.get('position', 0)),
+                        'Dividend Amount': safe_float(div.get('amount', 0)),
+                        'Date': div.get('paid_at', '')[:10] if div.get('paid_at') else 'N/A'
+                    })
+                
+                dividend_df = pd.DataFrame(dividend_data)
+                dividend_df['Dividend Amount'] = dividend_df['Dividend Amount'].apply(format_currency)
+                
+                st.dataframe(
+                    dividend_df,
+                    use_container_width=True,
+                    hide_index=True,
+                    height=300
+                )
+            else:
+                st.info("No dividend history found")
+        
+        with col_summary:
+            st.markdown("#### 📋 Summary")
+            
+            summary_data = {
+                'Equity': format_currency(safe_float(current_holding.get('equity', 0))),
+                'Dividend': format_currency(metrics.get('total_dividend_amount', 0)),
+                'Total Quantity': f"{metrics.get('net_quantity', 0):.4f}",
+                'Total Profit': format_currency(total_profit)
+            }
+            
+            for key, value in summary_data.items():
+                st.markdown(f"**{key}:** {value}")
+            
+            # Additional metrics
+            st.markdown("---")
+            st.markdown("**Additional Info:**")
+            st.markdown(f"• Current Price: {format_currency(safe_float(current_holding.get('price', 0)))}")
+            st.markdown(f"• Average Cost: {format_currency(safe_float(current_holding.get('average_buy_price', 0)))}")
+            st.markdown(f"• Market Value: {format_currency(safe_float(current_holding.get('market_value', 0)))}")
+            st.markdown(f"• Total Orders: {metrics.get('total_orders', 0)}")
+            st.markdown(f"• Dividend Payments: {metrics.get('dividend_count', 0)}")
+        
+    except Exception as e:
+        st.error(f"Error loading stock details for {symbol}: {str(e)}")
 
 def display_orders():
     """Display order history"""
