@@ -117,11 +117,20 @@ def user_confirmation_popup():
                 """)
             
             with col2:
+                attempted_username = user_info.get('attempted_username', 'Unknown')
+                profile_email = user_info.get('email', 'Unknown')
+                
                 st.info(f"""
                 **Login Info:**
-                - **Username:** {user_info.get('username', 'Unknown')}
+                - **Attempted Username:** {attempted_username}
+                - **Profile Email:** {profile_email}
                 - **Account ID:** {user_info.get('account_id', 'Unknown')}
                 """)
+                
+                # Security warning if there's a mismatch
+                if attempted_username != 'Unknown' and profile_email != 'Unknown':
+                    if attempted_username.lower() != profile_email.lower():
+                        st.error(f"⚠️ **SECURITY WARNING**: Login username ({attempted_username}) doesn't match profile email ({profile_email}). This may indicate a session issue.")
             
             st.markdown("---")
             

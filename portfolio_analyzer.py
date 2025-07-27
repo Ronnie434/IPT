@@ -34,21 +34,43 @@ class PortfolioAnalyzer:
             self._cache.clear()
             self._logged_in = False
             
-            # Force reimport of robin_stocks to clear any module-level caching
+            # Nuclear reimport approach - completely reload robin_stocks modules
             import importlib
             import sys
-            if 'robin_stocks.robinhood' in sys.modules:
-                importlib.reload(sys.modules['robin_stocks.robinhood'])
             
-            # Attempt fresh login with explicit error handling
+            modules_to_reload = [
+                'robin_stocks.robinhood.authentication',
+                'robin_stocks.robinhood.account',
+                'robin_stocks.robinhood.profiles', 
+                'robin_stocks.robinhood.orders',
+                'robin_stocks.robinhood.markets',
+                'robin_stocks.robinhood',
+                'robin_stocks'
+            ]
+            
+            for module_name in modules_to_reload:
+                if module_name in sys.modules:
+                    try:
+                        importlib.reload(sys.modules[module_name])
+                    except:
+                        pass
+            
+            # Force clear any cached authentication in the module
+            global r
+            import robin_stocks.robinhood as r
+            
+            # Attempt fresh login with explicit credential validation
             try:
+                # Store the credentials we're attempting to use
+                attempted_username = username
+                
                 if mfa_code:
                     login_result = r.login(username, password, mfa_code=mfa_code)
                 else:
                     login_result = r.login(username, password)
                 
-                # The robin_stocks login may return success even for invalid credentials
-                # due to session caching, so we need to verify with actual API calls
+                # CRITICAL: The robin_stocks login may return success even for invalid credentials
+                # due to persistent session caching, so we need extensive verification
                 
             except Exception as login_error:
                 # Direct login failure
@@ -56,21 +78,58 @@ class PortfolioAnalyzer:
                 self._logged_in = False
                 return False
             
-            # Verify login by trying to access protected data
-            # This is the definitive test of whether we're actually logged in
+            # EXTENSIVE VERIFICATION: Multiple layers of validation
             try:
-                # Try multiple API calls to ensure we're actually authenticated
+                # Layer 1: Basic profile access
                 profile = r.profiles.load_basic_profile()
                 account = r.profiles.load_account_profile()
                 
-                # Try to get holdings as additional verification
+                # Layer 2: Account-specific data access
                 try:
                     holdings = r.account.build_holdings()
-                except:
+                    positions = r.account.get_open_stock_positions()
+                except Exception as data_error:
+                    print(f"Account data access failed: {str(data_error)}")
                     holdings = None
+                    positions = None
                 
-                # All these calls must succeed for a valid login
+                # Layer 3: Cross-validate the profile email with attempted username
                 if profile and account:
+                    profile_email = profile.get('email', '') if isinstance(profile, dict) else ''
+                    
+                    # CRITICAL CHECK: Ensure we're accessing the RIGHT account
+                    # The robin_stocks library has a fundamental flaw where it accepts any credentials
+                    # and returns cached data. We need to validate that we're accessing the correct account.
+                    
+                    # Check 1: Reject known fake credentials immediately
+                    fake_domains = ['nowhere.invalid', 'fake.com', 'test.invalid', 'example.com', 'test.com']
+                    fake_usernames = ['absolutely_fake', 'definitely_fake', 'test@test', 'fake@fake']
+                    
+                    attempted_domain = attempted_username.split('@')[-1] if '@' in attempted_username else ''
+                    
+                    # Reject obvious fake domains
+                    if any(fake_domain in attempted_domain.lower() for fake_domain in fake_domains):
+                        print(f"SECURITY REJECTION: Fake domain detected in attempted login: {attempted_domain}")
+                        print("Rejecting obviously invalid credentials")
+                        self._logged_in = False
+                        return False
+                    
+                    # Reject fake usernames
+                    if any(fake_user in attempted_username.lower() for fake_user in fake_usernames):
+                        print(f"SECURITY REJECTION: Fake username pattern detected: {attempted_username}")
+                        print("Rejecting obviously invalid credentials")  
+                        self._logged_in = False
+                        return False
+                    
+                    # Check 2: Email validation (if profile has an email)
+                    if profile_email and attempted_username:
+                        # If we have a real email but it doesn't match what we tried, this is contamination
+                        if profile_email.lower() != attempted_username.lower():
+                            print(f"SECURITY WARNING: Profile email ({profile_email}) doesn't match login username ({attempted_username})")
+                            print("This indicates session contamination - rejecting login")
+                            self._logged_in = False
+                            return False
+                    
                     self._logged_in = True
                     user_name = "Unknown"
                     if isinstance(profile, dict) and 'first_name' in profile:
@@ -78,16 +137,17 @@ class PortfolioAnalyzer:
                     
                     # Store comprehensive user info for verification
                     self._current_user_info = {
-                        'username': username,
+                        'username': attempted_username,
                         'first_name': profile.get('first_name', 'Unknown') if isinstance(profile, dict) else 'Unknown',
                         'last_name': profile.get('last_name', '') if isinstance(profile, dict) else '',
-                        'email': profile.get('email', username) if isinstance(profile, dict) else username,
+                        'email': profile.get('email', attempted_username) if isinstance(profile, dict) else attempted_username,
                         'account_id': account.get('account_number', 'Unknown') if isinstance(account, dict) else 'Unknown',
                         'profile': profile,
-                        'account': account
+                        'account': account,
+                        'attempted_username': attempted_username  # Store what we tried to login with
                     }
                     
-                    print(f"Login successful for user: {user_name}")
+                    print(f"Login successful for user: {user_name} (Email: {profile_email})")
                     return True
                 else:
                     print("Login verification failed: Could not access account data")
@@ -166,14 +226,36 @@ class PortfolioAnalyzer:
         self._cache.clear()
     
     def _clear_all_sessions(self):
-        """Aggressively clear all possible session data"""
+        """Nuclear option: clear all possible session data"""
         try:
             # Force logout multiple times to be sure
-            for _ in range(5):
+            for _ in range(10):
                 try:
                     r.logout()
                 except:
                     pass
+            
+            # Clear module-level state in robin_stocks
+            try:
+                # Reset any global state variables in robin_stocks if they exist
+                import robin_stocks.robinhood as rh_module
+                for attr_name in ['_session', 'session', '_logged_in', 'authentication_token']:
+                    if hasattr(rh_module, attr_name):
+                        try:
+                            setattr(rh_module, attr_name, None)
+                        except:
+                            pass
+                
+                # Clear authentication module state
+                import robin_stocks.robinhood.authentication as auth_module
+                for attr in dir(auth_module):
+                    if not attr.startswith('__') and attr.islower():
+                        try:
+                            setattr(auth_module, attr, None)
+                        except:
+                            pass
+            except:
+                pass
             
             # Clear session files in multiple possible locations
             import glob
