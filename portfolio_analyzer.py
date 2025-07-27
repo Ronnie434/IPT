@@ -26,15 +26,18 @@ class PortfolioAnalyzer:
             bool: True if login successful, False otherwise
         """
         try:
-            # Force logout first to clear any existing session
-            try:
-                r.logout()
-            except:
-                pass
+            # Aggressive session clearing
+            self._clear_all_sessions()
             
             # Clear any cached data
             self._cache.clear()
             self._logged_in = False
+            
+            # Force reimport of robin_stocks to clear any module-level caching
+            import importlib
+            import sys
+            if 'robin_stocks.robinhood' in sys.modules:
+                importlib.reload(sys.modules['robin_stocks.robinhood'])
             
             # Attempt fresh login
             if mfa_code:
@@ -58,20 +61,10 @@ class PortfolioAnalyzer:
     def logout(self):
         """Logout from Robinhood and clear all session data"""
         try:
-            # Force logout to clear robin_stocks session
-            r.logout()
+            # Use aggressive session clearing
+            self._clear_all_sessions()
             self._logged_in = False
             self._cache.clear()
-            
-            # Additional cleanup - clear any persistent session files
-            import os
-            session_files = ['.robinhood.pickle', 'robinhood.pickle']
-            for file in session_files:
-                if os.path.exists(file):
-                    try:
-                        os.remove(file)
-                    except:
-                        pass
                         
         except Exception as e:
             # Don't show error for logout - just ensure we clear local state
@@ -81,6 +74,60 @@ class PortfolioAnalyzer:
     def clear_cache(self):
         """Clear the data cache to force refresh"""
         self._cache.clear()
+    
+    def _clear_all_sessions(self):
+        """Aggressively clear all possible session data"""
+        try:
+            # Force logout multiple times to be sure
+            for _ in range(3):
+                try:
+                    r.logout()
+                except:
+                    pass
+            
+            # Clear session files in multiple possible locations
+            import glob
+            possible_locations = [
+                './',
+                '/tmp/',
+                os.path.expanduser('~/.'),
+                '/app/',
+                '/home/runner/'
+            ]
+            
+            session_patterns = [
+                '*.pickle',
+                '*robinhood*',
+                '.robinhood*',
+                'rh_*',
+                '*auth*'
+            ]
+            
+            for location in possible_locations:
+                for pattern in session_patterns:
+                    try:
+                        for file_path in glob.glob(os.path.join(location, pattern)):
+                            if os.path.isfile(file_path) and ('robinhood' in file_path.lower() or file_path.endswith('.pickle')):
+                                try:
+                                    os.remove(file_path)
+                                    print(f"Removed session file: {file_path}")
+                                except:
+                                    pass
+                    except:
+                        pass
+                        
+            # Clear environment variables that might cache auth
+            env_vars_to_clear = [key for key in os.environ.keys() 
+                               if any(term in key.lower() for term in ['robinhood', 'rh_', 'auth', 'token'])]
+            
+            for var in env_vars_to_clear:
+                try:
+                    del os.environ[var]
+                except:
+                    pass
+                    
+        except Exception as e:
+            pass  # Continue even if clearing fails
     
     def _check_login(self):
         """Check if user is logged in"""

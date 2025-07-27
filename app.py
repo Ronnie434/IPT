@@ -62,6 +62,15 @@ def login_form():
             
             with st.spinner("Logging in to Robinhood..."):
                 try:
+                    # Clear any existing analyzer first
+                    if 'analyzer' in st.session_state and st.session_state.analyzer:
+                        try:
+                            st.session_state.analyzer.logout()
+                        except:
+                            pass
+                        del st.session_state.analyzer
+                    
+                    # Create completely fresh analyzer instance
                     analyzer = PortfolioAnalyzer()
                     success = analyzer.login(username, password, mfa_code if mfa_code else None)
                     
