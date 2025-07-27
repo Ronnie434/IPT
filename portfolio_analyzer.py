@@ -39,17 +39,51 @@ class PortfolioAnalyzer:
             if 'robin_stocks.robinhood' in sys.modules:
                 importlib.reload(sys.modules['robin_stocks.robinhood'])
             
-            # Attempt fresh login
-            if mfa_code:
-                login_result = r.login(username, password, mfa_code=mfa_code)
-            else:
-                login_result = r.login(username, password)
+            # Attempt fresh login with explicit error handling
+            try:
+                if mfa_code:
+                    login_result = r.login(username, password, mfa_code=mfa_code)
+                else:
+                    login_result = r.login(username, password)
+                
+                # The robin_stocks login may return success even for invalid credentials
+                # due to session caching, so we need to verify with actual API calls
+                
+            except Exception as login_error:
+                # Direct login failure
+                print(f"Direct login failed: {str(login_error)}")
+                self._logged_in = False
+                return False
             
-            # Check if login was successful
-            if login_result is not None:
-                self._logged_in = True
-                return True
-            else:
+            # Verify login by trying to access protected data
+            # This is the definitive test of whether we're actually logged in
+            try:
+                # Try multiple API calls to ensure we're actually authenticated
+                profile = r.profiles.load_basic_profile()
+                account = r.profiles.load_account_profile()
+                
+                # Try to get holdings as additional verification
+                try:
+                    holdings = r.account.build_holdings()
+                except:
+                    holdings = None
+                
+                # All these calls must succeed for a valid login
+                if profile and account:
+                    self._logged_in = True
+                    user_name = "Unknown"
+                    if isinstance(profile, dict) and 'first_name' in profile:
+                        user_name = profile['first_name']
+                    print(f"Login successful for user: {user_name}")
+                    return True
+                else:
+                    print("Login verification failed: Could not access account data")
+                    self._logged_in = False
+                    return False
+                    
+            except Exception as verify_error:
+                # If we can't access protected data, login definitely failed
+                print(f"Login verification failed: {str(verify_error)}")
                 self._logged_in = False
                 return False
                 
