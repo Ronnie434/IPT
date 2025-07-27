@@ -26,6 +26,17 @@ class PortfolioAnalyzer:
             bool: True if login successful, False otherwise
         """
         try:
+            # Force logout first to clear any existing session
+            try:
+                r.logout()
+            except:
+                pass
+            
+            # Clear any cached data
+            self._cache.clear()
+            self._logged_in = False
+            
+            # Attempt fresh login
             if mfa_code:
                 login_result = r.login(username, password, mfa_code=mfa_code)
             else:
@@ -45,13 +56,27 @@ class PortfolioAnalyzer:
             return False
     
     def logout(self):
-        """Logout from Robinhood"""
+        """Logout from Robinhood and clear all session data"""
         try:
+            # Force logout to clear robin_stocks session
             r.logout()
             self._logged_in = False
             self._cache.clear()
+            
+            # Additional cleanup - clear any persistent session files
+            import os
+            session_files = ['.robinhood.pickle', 'robinhood.pickle']
+            for file in session_files:
+                if os.path.exists(file):
+                    try:
+                        os.remove(file)
+                    except:
+                        pass
+                        
         except Exception as e:
-            st.error(f"Logout error: {str(e)}")
+            # Don't show error for logout - just ensure we clear local state
+            self._logged_in = False
+            self._cache.clear()
     
     def clear_cache(self):
         """Clear the data cache to force refresh"""

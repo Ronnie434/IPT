@@ -333,9 +333,16 @@ def main():
                     st.error(f"Refresh failed: {str(e)}")
         
         if st.button("🚪 Logout"):
-            # Clear session state
+            # Properly logout from Robinhood first
+            if st.session_state.analyzer:
+                st.session_state.analyzer.logout()
+            
+            # Clear all session state
             for key in list(st.session_state.keys()):
                 del st.session_state[key]
+            
+            # Show logout message
+            st.success("Logged out successfully!")
             st.rerun()
     
     # Portfolio summary at the top
