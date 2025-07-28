@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from portfolio_analyzer import PortfolioAnalyzer
 from utils import safe_float
 import os
+import logging
 from typing import Optional
 
 app = FastAPI(title="Portfolio Analyzer API")
