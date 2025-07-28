@@ -27,7 +27,7 @@ export default function Home() {
     setIsLoading(true)
     
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -160,7 +160,7 @@ function Dashboard() {
   const fetchPortfolioData = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/portfolio/summary')
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/portfolio/summary`)
       const data = await response.json()
       if (data.success) {
         setPortfolioData(data.data)

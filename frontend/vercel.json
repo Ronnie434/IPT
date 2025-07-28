@@ -1,6 +1,6 @@
 {
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://your-render-app.onrender.com",
+    "NEXT_PUBLIC_API_URL": "https://ipt-fb73.onrender.com",
     "NEXT_PUBLIC_APP_ENV": "production"
   },
   "build": {
