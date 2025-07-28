@@ -37,7 +37,7 @@ export function ThemeProvider({
         setTheme(stored)
       }
     }
-  }, [])
+  }, [storageKey])
 
   React.useEffect(() => {
     if (typeof window === "undefined") return
