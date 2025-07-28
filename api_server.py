@@ -370,6 +370,123 @@ async def get_current_user_info():
     
     return response
 
+@app.post("/api/auth/logout")
+async def logout():
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            analyzer.logout()
+            analyzer = None  # Clear the global analyzer instance
+            
+            response_data = {"success": True, "message": "Logout successful"}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error during logout: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.post("/api/session/clear")
+async def clear_session():
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            analyzer.clear_session()
+            
+            response_data = {"success": True, "message": "Session cleared successfully"}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error clearing session: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.post("/api/cache/clear")
+async def clear_cache():
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            analyzer.clear_cache()
+            
+            response_data = {"success": True, "message": "Cache cleared successfully"}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error clearing cache: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.get("/api/portfolio/holdings")
+async def get_holdings():
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            holdings = analyzer.get_holdings()
+            
+            response_data = {"success": True, "data": holdings}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error loading holdings data: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
 @app.get("/api/health")
 async def health_check():
     response_data = {"status": "healthy"}
