@@ -51,7 +51,7 @@ async def login(request: LoginRequest):
     logger.info(f"LOGIN ATTEMPT - User: {request.username}, MFA: {'Yes' if request.mfa_code else 'No'}, Timestamp: {datetime.datetime.now().isoformat()}")
     
     try:
-        # CRITICAL: Clear any existing analyzer and force fresh authentication
+        # CRITICAL: Aggressive session clearing to prevent contamination
         if analyzer:
             try:
                 analyzer.logout()
@@ -60,6 +60,16 @@ async def login(request: LoginRequest):
                 logger.warning(f"LOGIN - Error clearing existing analyzer: {str(logout_error)}")
                 pass
             analyzer = None
+        
+        # NUCLEAR OPTION: Clear any potential robin_stocks global state
+        try:
+            import robin_stocks.robinhood as r
+            # Force clear any cached authentication
+            r.authentication.logout()
+            logger.info(f"LOGIN - Forced robin_stocks logout for user: {request.username}")
+        except Exception as rs_logout_error:
+            logger.warning(f"LOGIN - Error with robin_stocks logout: {str(rs_logout_error)}")
+            pass
         
         # Create completely new analyzer instance to ensure fresh authentication
         analyzer = PortfolioAnalyzer()
@@ -71,8 +81,25 @@ async def login(request: LoginRequest):
         success = analyzer.login(request.username, request.password, request.mfa_code)
         
         if success:
-            logger.info(f"LOGIN SUCCESS - User: {request.username}, Timestamp: {datetime.datetime.now().isoformat()}")
-            response_data = {"success": True, "message": "Login successful"}
+            # CRITICAL VALIDATION: Verify we're actually connected to the right account
+            try:
+                user_info = analyzer.get_current_user_info()
+                logged_in_email = user_info.get('email', '').lower() if user_info else ''
+                attempted_email = request.username.lower()
+                
+                if logged_in_email and logged_in_email != attempted_email:
+                    logger.error(f"LOGIN CONTAMINATION DETECTED - Attempted: {attempted_email}, Got: {logged_in_email}")
+                    analyzer.logout()
+                    analyzer = None
+                    response_data = {"success": False, "message": "Session contamination detected. Please try again."}
+                else:
+                    logger.info(f"LOGIN SUCCESS - User: {request.username}, Verified Email: {logged_in_email}, Timestamp: {datetime.datetime.now().isoformat()}")
+                    response_data = {"success": True, "message": "Login successful"}
+            except Exception as validation_error:
+                logger.error(f"LOGIN VALIDATION ERROR - {str(validation_error)}")
+                # If we can't validate, assume success but log the issue
+                logger.info(f"LOGIN SUCCESS (UNVALIDATED) - User: {request.username}, Timestamp: {datetime.datetime.now().isoformat()}")
+                response_data = {"success": True, "message": "Login successful"}
         else:
             # If login failed, clear the analyzer
             analyzer = None
@@ -400,8 +427,27 @@ async def logout():
     else:
         try:
             logger.info(f"LOGOUT ATTEMPT - Active session found, Timestamp: {datetime.datetime.now().isoformat()}")
+            
+            # Get user info before logout for logging
+            try:
+                user_info = analyzer.get_current_user_info()
+                current_user = user_info.get('email', 'Unknown') if user_info else 'Unknown'
+                logger.info(f"LOGOUT - Logging out user: {current_user}")
+            except:
+                logger.info(f"LOGOUT - Could not retrieve user info before logout")
+            
+            # Perform logout
             analyzer.logout()
             analyzer = None
+            
+            # Additional robin_stocks cleanup
+            try:
+                import robin_stocks.robinhood as r
+                r.authentication.logout()
+                logger.info(f"LOGOUT - Forced robin_stocks logout")
+            except Exception as rs_logout_error:
+                logger.warning(f"LOGOUT - Error with robin_stocks logout: {str(rs_logout_error)}")
+            
             logger.info(f"LOGOUT SUCCESS - Session cleared successfully, Timestamp: {datetime.datetime.now().isoformat()}")
             response_data = {"success": True, "message": "Logout successful"}
         except Exception as e:
