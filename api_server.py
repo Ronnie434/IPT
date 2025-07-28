@@ -9,8 +9,7 @@ from typing import Optional
 
 app = FastAPI(title="Portfolio Analyzer API")
 
-
-# Global analyzer instance
+# Global analyzer instance for session-based authentication
 analyzer = None
 
 class LoginRequest(BaseModel):
@@ -29,26 +28,39 @@ class PortfolioResponse(BaseModel):
 
 @app.post("/api/auth/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
+    """
+    Login with fresh credentials, ensuring no old cached session is used.
+    Creates persistent session for subsequent API calls.
+    """
     global analyzer
     
     try:
-        # Clear any existing analyzer
+        # CRITICAL: Clear any existing analyzer and force fresh authentication
         if analyzer:
             try:
                 analyzer.logout()
             except:
                 pass
+            analyzer = None
         
-        # Create new analyzer instance
+        # Create completely new analyzer instance to ensure fresh authentication
         analyzer = PortfolioAnalyzer()
+        
+        # IMPORTANT: This login call will use the enhanced authentication logic
+        # from PortfolioAnalyzer that validates fresh credentials and prevents
+        # session contamination
         success = analyzer.login(request.username, request.password, request.mfa_code)
         
         if success:
             response_data = {"success": True, "message": "Login successful"}
         else:
+            # If login failed, clear the analyzer
+            analyzer = None
             response_data = {"success": False, "message": "Login failed. Please check your credentials."}
             
     except Exception as e:
+        # If any error occurs, clear the analyzer
+        analyzer = None
         response_data = {"success": False, "message": f"Login error: {str(e)}"}
     
     # Create JSONResponse with CORS headers
@@ -62,10 +74,13 @@ async def login(request: LoginRequest):
 
 @app.get("/api/portfolio/summary", response_model=PortfolioResponse)
 async def get_portfolio_summary():
+    """
+    Get portfolio summary using session-based authentication
+    """
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
@@ -114,14 +129,12 @@ async def get_dividends():
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             dividends = analyzer.get_dividends()
-            
             response_data = {"success": True, "data": dividends}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -143,14 +156,12 @@ async def get_total_dividends():
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             total_dividends = analyzer.get_total_dividends()
-            
             response_data = {"success": True, "data": {"total_dividends": total_dividends}}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -172,14 +183,12 @@ async def get_open_orders():
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             open_orders = analyzer.get_open_orders()
-            
             response_data = {"success": True, "data": open_orders}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -201,14 +210,12 @@ async def get_all_orders():
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             all_orders = analyzer.get_all_orders()
-            
             response_data = {"success": True, "data": all_orders}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -230,14 +237,12 @@ async def get_stock_orders_by_symbol(symbol: str):
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             orders = analyzer.get_stock_orders_by_symbol(symbol)
-            
             response_data = {"success": True, "data": orders}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -259,14 +264,12 @@ async def get_stock_dividends_by_symbol(symbol: str):
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             dividends = analyzer.get_stock_dividends_by_symbol(symbol)
-            
             response_data = {"success": True, "data": dividends}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -288,14 +291,12 @@ async def get_stock_summary(symbol: str):
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             stock_summary = analyzer.get_stock_summary(symbol)
-            
             response_data = {"success": True, "data": stock_summary}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -317,14 +318,12 @@ async def get_account_info():
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             account_info = analyzer.get_account_info()
-            
             response_data = {"success": True, "data": account_info}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -346,14 +345,12 @@ async def get_current_user_info():
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             user_info = analyzer.get_current_user_info()
-            
             response_data = {"success": True, "data": user_info}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -375,15 +372,13 @@ async def logout():
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             analyzer.logout()
-            analyzer = None  # Clear the global analyzer instance
-            
+            analyzer = None
             response_data = {"success": True, "message": "Logout successful"}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -405,14 +400,12 @@ async def clear_session():
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             analyzer.clear_session()
-            
             response_data = {"success": True, "message": "Session cleared successfully"}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -434,14 +427,12 @@ async def clear_cache():
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             analyzer.clear_cache()
-            
             response_data = {"success": True, "message": "Cache cleared successfully"}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
@@ -463,14 +454,12 @@ async def get_holdings():
     global analyzer
     
     if not analyzer:
-        response_data = {"success": False, "message": "Not authenticated"}
+        response_data = {"success": False, "message": "Not authenticated. Please login first."}
         response = JSONResponse(content=response_data, status_code=401)
     else:
         try:
             holdings = analyzer.get_holdings()
-            
             response_data = {"success": True, "data": holdings}
-                
         except Exception as e:
             response_data = {
                 "success": False, 
