@@ -22,10 +22,10 @@ RUN mkdir -p .streamlit
 COPY .streamlit/config.toml .streamlit/
 
 # Expose port
-EXPOSE 10000
+EXPOSE 8000
 
 # Health check
-HEALTHCHECK CMD curl --fail http://localhost:10000/_stcore/health
+HEALTHCHECK CMD curl --fail http://localhost:8000/api/health
 
 # Run the application
-CMD ["streamlit", "run", "app.py", "--server.port=10000", "--server.address=0.0.0.0", "--server.headless=true", "--server.enableCORS=false", "--server.enableXsrfProtection=false"]
+CMD ["python", "api_server.py"]
