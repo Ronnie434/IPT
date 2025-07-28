@@ -13,11 +13,11 @@ const nextConfig = {
     },
   },
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8502',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'https://ipt-fb73.onrender.com',
     NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV || 'development',
   },
   async rewrites() {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8502';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ipt-fb73.onrender.com';
     return [
       {
         source: '/api/:path*',
