@@ -84,6 +84,15 @@ class PortfolioAnalyzer:
                 profile = r.profiles.load_basic_profile()
                 account = r.profiles.load_account_profile()
                 
+                # Debug logging to understand what data we're getting
+                print(f"DEBUG: Profile data type: {type(profile)}")
+                if isinstance(profile, dict):
+                    print(f"DEBUG: Profile keys: {list(profile.keys()) if profile else 'None'}")
+                    print(f"DEBUG: Profile first_name: {profile.get('first_name', 'NOT_FOUND')}")
+                    print(f"DEBUG: Profile email: {profile.get('email', 'NOT_FOUND')}")
+                else:
+                    print(f"DEBUG: Profile is not a dict: {profile}")
+                
                 # Layer 2: Account-specific data access
                 try:
                     holdings = r.account.build_holdings()
@@ -131,9 +140,6 @@ class PortfolioAnalyzer:
                             return False
                     
                     self._logged_in = True
-                    user_name = "Unknown"
-                    if isinstance(profile, dict) and 'first_name' in profile:
-                        user_name = profile['first_name']
                     
                     # Store comprehensive user info for verification
                     self._current_user_info = {
@@ -147,7 +153,10 @@ class PortfolioAnalyzer:
                         'attempted_username': attempted_username  # Store what we tried to login with
                     }
                     
-                    print(f"Login successful for user: {user_name} (Email: {profile_email})")
+                    # Use the stored user info for consistent display
+                    display_name = self._current_user_info.get('first_name', 'Unknown')
+                    display_email = self._current_user_info.get('email', attempted_username)
+                    print(f"Login successful for user: {display_name} (Email: {display_email})")
                     return True
                 else:
                     print("Login verification failed: Could not access account data")
