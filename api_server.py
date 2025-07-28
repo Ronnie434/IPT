@@ -42,51 +42,51 @@ class PortfolioResponse(BaseModel):
 @app.post("/api/auth/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
     """
-    @app.post("/api/auth/login", response_model=LoginResponse)
-    async def login(request: LoginRequest):
-        """
-        Login with fresh credentials, ensuring no old cached session is used.
-        Creates persistent session for subsequent API calls.
-        """
-        global analyzer
-        
-        # Log login attempt (without password for security)
-        logger.info(f"LOGIN ATTEMPT - User: {request.username}, MFA: {'Yes' if request.mfa_code else 'No'}, Timestamp: {datetime.datetime.now().isoformat()}")
-        
-        try:
-            # CRITICAL: Clear any existing analyzer and force fresh authentication
-            if analyzer:
-                try:
-                    analyzer.logout()
-                    logger.info(f"LOGIN - Cleared existing analyzer session for user: {request.username}")
-                except Exception as logout_error:
-                    logger.warning(f"LOGIN - Error clearing existing analyzer: {str(logout_error)}")
-                    pass
-                analyzer = None
-            
-            # Create completely new analyzer instance to ensure fresh authentication
-            analyzer = PortfolioAnalyzer()
-            logger.info(f"LOGIN - Created new analyzer instance for user: {request.username}")
-            
-            # IMPORTANT: This login call will use the enhanced authentication logic
-            # from PortfolioAnalyzer that validates fresh credentials and prevents
-            # session contamination
-            success = analyzer.login(request.username, request.password, request.mfa_code)
-            
-            if success:
-                logger.info(f"LOGIN SUCCESS - User: {request.username}, Timestamp: {datetime.datetime.now().isoformat()}")
-                response_data = {"success": True, "message": "Login successful"}
-            else:
-                # If login failed, clear the analyzer
-                analyzer = None
-                logger.warning(f"LOGIN FAILED - User: {request.username}, Reason: Invalid credentials, Timestamp: {datetime.datetime.now().isoformat()}")
-                response_data = {"success": False, "message": "Login failed. Please check your credentials."}
-                
-        except Exception as e:
-            # If any error occurs, clear the analyzer
+    Login with fresh credentials, ensuring no old cached session is used.
+    Creates persistent session for subsequent API calls.
+    """
+    global analyzer
+    
+    # Log login attempt (without password for security)
+    logger.info(f"LOGIN ATTEMPT - User: {request.username}, MFA: {'Yes' if request.mfa_code else 'No'}, Timestamp: {datetime.datetime.now().isoformat()}")
+    
+    try:
+        # CRITICAL: Clear any existing analyzer and force fresh authentication
+        if analyzer:
+            try:
+                analyzer.logout()
+                logger.info(f"LOGIN - Cleared existing analyzer session for user: {request.username}")
+            except Exception as logout_error:
+                logger.warning(f"LOGIN - Error clearing existing analyzer: {str(logout_error)}")
+                pass
             analyzer = None
-            logger.error(f"LOGIN ERROR - User: {request.username}, Error: {str(e)}, Timestamp: {datetime.datetime.now().isoformat()}")
-            response_data = {"success": False, "message": f"Login error: {str(e)}"}
+        
+        # Create completely new analyzer instance to ensure fresh authentication
+        analyzer = PortfolioAnalyzer()
+        logger.info(f"LOGIN - Created new analyzer instance for user: {request.username}")
+        
+        # IMPORTANT: This login call will use the enhanced authentication logic
+        # from PortfolioAnalyzer that validates fresh credentials and prevents
+        # session contamination
+        success = analyzer.login(request.username, request.password, request.mfa_code)
+        
+        if success:
+            logger.info(f"LOGIN SUCCESS - User: {request.username}, Timestamp: {datetime.datetime.now().isoformat()}")
+            response_data = {"success": True, "message": "Login successful"}
+        else:
+            # If login failed, clear the analyzer
+            analyzer = None
+            logger.warning(f"LOGIN FAILED - User: {request.username}, Reason: Invalid credentials, Timestamp: {datetime.datetime.now().isoformat()}")
+            response_data = {"success": False, "message": "Login failed. Please check your credentials."}
+            
+    except Exception as e:
+        # If any error occurs, clear the analyzer
+        analyzer = None
+        logger.error(f"LOGIN ERROR - User: {request.username}, Error: {str(e)}, Timestamp: {datetime.datetime.now().isoformat()}")
+        response_data = {"success": False, "message": f"Login error: {str(e)}"}
+    
+    # Create JSONResponse with CORS headers
+    response = JSONResponse(content=response_data)
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "*"
