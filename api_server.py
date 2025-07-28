@@ -109,6 +109,267 @@ async def get_portfolio_summary():
     
     return response
 
+@app.get("/api/portfolio/dividends")
+async def get_dividends():
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            dividends = analyzer.get_dividends()
+            
+            response_data = {"success": True, "data": dividends}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error loading dividends data: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.get("/api/portfolio/total-dividends")
+async def get_total_dividends():
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            total_dividends = analyzer.get_total_dividends()
+            
+            response_data = {"success": True, "data": {"total_dividends": total_dividends}}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error loading total dividends data: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.get("/api/orders/open")
+async def get_open_orders():
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            open_orders = analyzer.get_open_orders()
+            
+            response_data = {"success": True, "data": open_orders}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error loading open orders data: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.get("/api/orders/all")
+async def get_all_orders():
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            all_orders = analyzer.get_all_orders()
+            
+            response_data = {"success": True, "data": all_orders}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error loading all orders data: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.get("/api/orders/symbol/{symbol}")
+async def get_stock_orders_by_symbol(symbol: str):
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            orders = analyzer.get_stock_orders_by_symbol(symbol)
+            
+            response_data = {"success": True, "data": orders}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error loading orders for symbol {symbol}: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.get("/api/dividends/symbol/{symbol}")
+async def get_stock_dividends_by_symbol(symbol: str):
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            dividends = analyzer.get_stock_dividends_by_symbol(symbol)
+            
+            response_data = {"success": True, "data": dividends}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error loading dividends for symbol {symbol}: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.get("/api/stock/{symbol}")
+async def get_stock_summary(symbol: str):
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            stock_summary = analyzer.get_stock_summary(symbol)
+            
+            response_data = {"success": True, "data": stock_summary}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error loading summary for symbol {symbol}: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.get("/api/account/info")
+async def get_account_info():
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            account_info = analyzer.get_account_info()
+            
+            response_data = {"success": True, "data": account_info}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error loading account info: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
+@app.get("/api/user/info")
+async def get_current_user_info():
+    global analyzer
+    
+    if not analyzer:
+        response_data = {"success": False, "message": "Not authenticated"}
+        response = JSONResponse(content=response_data, status_code=401)
+    else:
+        try:
+            user_info = analyzer.get_current_user_info()
+            
+            response_data = {"success": True, "data": user_info}
+                
+        except Exception as e:
+            response_data = {
+                "success": False, 
+                "message": f"Error loading user info: {str(e)}"
+            }
+        
+        response = JSONResponse(content=response_data)
+    
+    # Add CORS headers to the response
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    
+    return response
+
 @app.get("/api/health")
 async def health_check():
     response_data = {"status": "healthy"}
