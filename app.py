@@ -9,9 +9,8 @@ from utils import format_currency, format_percentage, safe_float
 
 # Production configuration
 if os.environ.get('RENDER'):
-    # Running on Render
-    st.set_option('deprecation.showPyplotGlobalUse', False)
-    st.set_option('deprecation.showfileUploaderEncoding', False)
+    # Running on Render - these config options are no longer available in newer Streamlit versions
+    pass
 
 # Page configuration
 st.set_page_config(
