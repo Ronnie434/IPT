@@ -14,7 +14,7 @@ class PortfolioAnalyzer:
         self._cache_timeout = 300  # 5 minutes
         self._current_user_info = {}
         
-    def login(self, username: str, password: str, mfa_code: Optional[str] = None) -> bool:
+    def login(self, username: str, password: str, store_session=False, mfa_code: Optional[str] = None) -> bool:
         """
         Login to Robinhood with provided credentials
         
@@ -65,9 +65,9 @@ class PortfolioAnalyzer:
                 attempted_username = username
                 
                 if mfa_code:
-                    login_result = r.login(username, password, mfa_code=mfa_code)
+                    login_result = r.login(username, password, mfa_code=mfa_code, store_session=store_session)
                 else:
-                    login_result = r.login(username, password)
+                    login_result = r.login(username, password, store_session=store_session)
                 
                 # CRITICAL: The robin_stocks login may return success even for invalid credentials
                 # due to persistent session caching, so we need extensive verification
