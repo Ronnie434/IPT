@@ -480,7 +480,7 @@ function Dashboard({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => void 
                   <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                     Portfolio Analyzer
                   </h1>
-                  <p className="text-xs text-gray-500 dark:text-gray-300">Real-time insights</p>
+                  {/* <p className="text-xs text-gray-500 dark:text-gray-300">Real-time insights</p> */}
                 </div>
               </div>
             </div>
@@ -497,37 +497,37 @@ function Dashboard({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => void 
                   onClick={handleRefresh}
                   variant="outline"
                   size="sm"
-                  className="border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 p-2"
+                  title="Refresh"
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Refresh
+                  <RefreshCw className="h-4 w-4" />
                 </Button>
                 <Button 
                   onClick={handleClearSession}
                   variant="outline"
                   size="sm"
-                  className="border-yellow-300 dark:border-yellow-700 bg-white dark:bg-gray-900 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                  className="border-yellow-300 dark:border-yellow-700 bg-white dark:bg-gray-900 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 p-2"
+                  title="Clear Session"
                 >
-                  <Shield className="h-4 w-4 mr-2" />
-                  Clear Session
+                  <Shield className="h-4 w-4" />
                 </Button>
                 <Button 
                   onClick={handleClearCache}
                   variant="outline"
                   size="sm"
-                  className="border-purple-300 dark:border-purple-700 bg-white dark:bg-gray-900 text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                  className="border-purple-300 dark:border-purple-700 bg-white dark:bg-gray-900 text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 p-2"
+                  title="Clear Cache"
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Clear Cache
+                  <RefreshCw className="h-4 w-4" />
                 </Button>
                 <Button 
                   onClick={handleLogout}
                   variant="outline"
                   size="sm"
-                  className="border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 p-2"
+                  title="Logout"
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
+                  <LogOut className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -550,67 +550,67 @@ function Dashboard({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => void 
         {portfolioData && (
           <section aria-labelledby="portfolio-summary" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <h2 id="portfolio-summary" className="sr-only">Portfolio Summary</h2>
-            <Card variant="glass" className="group relative overflow-hidden animate-scale-in" style={{ animationDelay: '0.1s' }} role="article" aria-labelledby="total-equity">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-indigo-600/10 dark:from-blue-500/20 dark:to-indigo-700/20"></div>
+            <Card className="group relative overflow-hidden animate-scale-in bg-white dark:bg-black/30 border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none" style={{ animationDelay: '0.1s' }} role="article" aria-labelledby="total-equity">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-600/5 dark:from-blue-500/20 dark:to-indigo-700/20"></div>
               <CardHeader className="relative">
                 <div className="flex items-center justify-between mb-3">
                   <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg shadow-blue-500/25 group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
                     <DollarSign className="h-6 w-6 text-white" />
                   </div>
-                  <div className="text-xs font-medium text-blue-400/80 dark:text-blue-300/80 uppercase tracking-wide" id="total-equity">Total Equity</div>
+                  <div className="text-xs font-medium text-blue-600 dark:text-blue-300 uppercase tracking-wide" id="total-equity">Total Equity</div>
                 </div>
-                <div className="text-3xl font-bold text-white mb-2 group-hover:scale-105 transition-transform duration-300" aria-describedby="total-equity">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:scale-105 transition-transform duration-300" aria-describedby="total-equity">
                   ${portfolioData.total_equity?.toFixed(2) || '0.00'}
                 </div>
-                <p className="text-sm text-blue-200/80 dark:text-blue-300/80">Current portfolio value</p>
+                <p className="text-sm text-gray-600 dark:text-blue-300/80">Current portfolio value</p>
               </CardHeader>
             </Card>
 
-            <Card variant="glass" className="group relative overflow-hidden animate-scale-in" style={{ animationDelay: '0.2s' }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-teal-600/10 dark:from-emerald-500/20 dark:to-teal-700/20"></div>
+            <Card className="group relative overflow-hidden animate-scale-in bg-white dark:bg-black/30 border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none" style={{ animationDelay: '0.2s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-teal-600/5 dark:from-emerald-500/20 dark:to-teal-700/20"></div>
               <CardHeader className="relative">
                 <div className="flex items-center justify-between mb-3">
                   <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg shadow-emerald-500/25 group-hover:scale-110 transition-transform duration-300">
                     <TrendingUp className="h-6 w-6 text-white" />
                   </div>
-                  <div className="text-xs font-medium text-emerald-400/80 dark:text-emerald-300/80 uppercase tracking-wide">Market Value</div>
+                  <div className="text-xs font-medium text-emerald-600 dark:text-emerald-300 uppercase tracking-wide">Market Value</div>
                 </div>
-                <div className="text-3xl font-bold text-white mb-2 group-hover:scale-105 transition-transform duration-300">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:scale-105 transition-transform duration-300">
                   ${portfolioData.total_market_value?.toFixed(2) || '0.00'}
                 </div>
-                <p className="text-sm text-emerald-200/80 dark:text-emerald-300/80">Total market value</p>
+                <p className="text-sm text-gray-600 dark:text-emerald-300/80">Total market value</p>
               </CardHeader>
             </Card>
 
-            <Card variant="glass" className="group relative overflow-hidden animate-scale-in" style={{ animationDelay: '0.3s' }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-pink-600/10 dark:from-purple-500/20 dark:to-pink-700/20"></div>
+            <Card className="group relative overflow-hidden animate-scale-in bg-white dark:bg-black/30 border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none" style={{ animationDelay: '0.3s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-600/5 dark:from-purple-500/20 dark:to-pink-700/20"></div>
               <CardHeader className="relative">
                 <div className="flex items-center justify-between mb-3">
                   <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-lg shadow-purple-500/25 group-hover:scale-110 transition-transform duration-300">
                     <PieChart className="h-6 w-6 text-white" />
                   </div>
-                  <div className="text-xs font-medium text-purple-400/80 dark:text-purple-300/80 uppercase tracking-wide">Positions</div>
+                  <div className="text-xs font-medium text-purple-600 dark:text-purple-300 uppercase tracking-wide">Positions</div>
                 </div>
-                <div className="text-3xl font-bold text-white mb-2 group-hover:scale-105 transition-transform duration-300">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:scale-105 transition-transform duration-300">
                   {portfolioData.total_positions || 0}
                 </div>
-                <p className="text-sm text-purple-200/80 dark:text-purple-300/80">Number of holdings</p>
+                <p className="text-sm text-gray-600 dark:text-purple-300/80">Number of holdings</p>
               </CardHeader>
             </Card>
 
-            <Card variant="glass" className="group relative overflow-hidden animate-scale-in" style={{ animationDelay: '0.4s' }}>
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 to-orange-600/10 dark:from-amber-500/20 dark:to-orange-700/20"></div>
+            <Card className="group relative overflow-hidden animate-scale-in bg-white dark:bg-black/30 border border-gray-200 dark:border-gray-800 shadow-sm dark:shadow-none" style={{ animationDelay: '0.4s' }}>
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-600/5 dark:from-amber-500/20 dark:to-orange-700/20"></div>
               <CardHeader className="relative">
                 <div className="flex items-center justify-between mb-3">
                   <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl shadow-lg shadow-amber-500/25 group-hover:scale-110 transition-transform duration-300 animate-pulse">
                     <Activity className="h-6 w-6 text-white" />
                   </div>
-                  <div className="text-xs font-medium text-amber-400/80 dark:text-amber-300/80 uppercase tracking-wide">Dividends</div>
+                  <div className="text-xs font-medium text-amber-600 dark:text-amber-300 uppercase tracking-wide">Dividends</div>
                 </div>
-                <div className="text-3xl font-bold text-white mb-2 group-hover:scale-105 transition-transform duration-300">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:scale-105 transition-transform duration-300">
                   ${portfolioData.total_dividends?.toFixed(2) || '0.00'}
                 </div>
-                <p className="text-sm text-amber-200/80 dark:text-amber-300/80">Lifetime dividends earned</p>
+                <p className="text-sm text-gray-600 dark:text-amber-300/80">Lifetime dividends earned</p>
               </CardHeader>
             </Card>
           </section>
@@ -621,7 +621,7 @@ function Dashboard({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => void 
           <h2 id="navigation-tabs" className="sr-only">Portfolio Navigation</h2>
           <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 via-purple-50/30 to-pink-50/50 dark:from-blue-950/20 dark:via-purple-950/10 dark:to-pink-950/20 rounded-2xl"></div>
           <div className="relative bg-white/60 dark:bg-black/60 backdrop-blur-sm rounded-2xl border border-white/30 dark:border-white/10 p-2">
-            <div className="flex space-x-2 overflow-x-auto" role="tablist">
+            <div className="flex space-x-2 overflow-x-auto" role="tablist" style={{padding: "5px 0px"}}>
               {[
                 { id: 'overview', name: 'Overview', icon: PieChart, color: 'blue' },
                 { id: 'holdings', name: 'Holdings', icon: TrendingUp, color: 'emerald' },
@@ -670,7 +670,7 @@ function Dashboard({ setIsLoggedIn }: { setIsLoggedIn: (value: boolean) => void 
                     <Icon className={`h-5 w-5 ${isActive ? 'animate-bounce-gentle' : ''}`} />
                     <span className="font-semibold">{tab.name}</span>
                     {isActive && (
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/20 to-transparent pointer-events-none"></div>
+                      <div className="absolute inset-0 rounded-xl from-white/20 to-transparent pointer-events-none"></div>
                     )}
                     {tab.id === 'stock-analysis' && (
                       <button

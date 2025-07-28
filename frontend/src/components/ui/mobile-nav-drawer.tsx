@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from './button'
 import { Menu, X, TrendingUp, PieChart, Activity, DollarSign } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { useTheme } from '../theme-provider'
 
 interface MobileNavDrawerProps {
   activeTab: string
@@ -22,6 +23,8 @@ export const MobileNavDrawer = ({
 }: MobileNavDrawerProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     const checkMobile = () => {
@@ -93,50 +96,50 @@ export const MobileNavDrawer = ({
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="h-full glass-card border-l border-white/20 dark:border-white/10 backdrop-blur-xl">
+        <div className="h-full bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-white/20 dark:border-white/10">
+          <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Navigation</h2>
-                <p className="text-sm text-white/70">Portfolio sections</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Navigation</h2>
+                {/* <p className="text-sm text-gray-600 dark:text-gray-400">Portfolio sections</p> */}
               </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(false)}
-              className="text-white/70 hover:text-white hover:bg-white/10 rounded-xl"
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl"
             >
               <X className="h-5 w-5" />
             </Button>
           </div>
 
           {/* Navigation Items */}
-          <div className="p-6 space-y-3">
+          <div className="p-6 space-y-3" style={{background: theme === "dark" ? 'black' : 'white'}}>
             {navigationItems.map((item, index) => {
               const Icon = item.icon
               const isActive = activeTab === item.id
               
               const colorClasses = {
                 blue: isActive 
-                  ? 'bg-blue-500/20 text-blue-300 border-blue-400/50' 
-                  : 'text-blue-300/80 hover:bg-blue-500/10 hover:text-blue-300',
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-600' 
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
                 emerald: isActive 
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50' 
-                  : 'text-emerald-300/80 hover:bg-emerald-500/10 hover:text-emerald-300',
+                  ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-600' 
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
                 purple: isActive 
-                  ? 'bg-purple-500/20 text-purple-300 border-purple-400/50' 
-                  : 'text-purple-300/80 hover:bg-purple-500/10 hover:text-purple-300',
+                  ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-600' 
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
                 amber: isActive 
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-400/50' 
-                  : 'text-amber-300/80 hover:bg-amber-500/10 hover:text-amber-300',
+                  ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-600' 
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
                 indigo: isActive 
-                  ? 'bg-indigo-500/20 text-indigo-300 border-indigo-400/50' 
-                  : 'text-indigo-300/80 hover:bg-indigo-500/10 hover:text-indigo-300'
+                  ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border-indigo-300 dark:border-indigo-600' 
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               }
 
               return (
@@ -144,9 +147,8 @@ export const MobileNavDrawer = ({
                   key={item.id}
                   onClick={() => item.id === 'stock-analysis' ? null : handleTabChange(item.id)}
                   className={cn(
-                    "w-full flex items-center space-x-4 p-4 rounded-xl transition-all duration-300 border border-transparent animate-slide-up",
+                    "w-full flex items-center space-x-4 p-4 rounded-xl transition-all duration-300 border animate-slide-up",
                     colorClasses[item.color as keyof typeof colorClasses],
-                    isActive && "border-opacity-50",
                     item.id === 'stock-analysis' ? 'cursor-default' : 'cursor-pointer'
                   )}
                   style={{ animationDelay: `${index * 0.1}s` }}
@@ -158,8 +160,8 @@ export const MobileNavDrawer = ({
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="flex-1 text-left">
-                    <p className="font-semibold">{item.name}</p>
-                    <p className="text-xs opacity-70">
+                    <p className="font-semibold text-gray-900 dark:text-white">{item.name}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       {item.id === 'overview' && 'Portfolio summary'}
                       {item.id === 'holdings' && 'Your positions'}
                       {item.id === 'dividends' && 'Dividend history'}
@@ -168,7 +170,7 @@ export const MobileNavDrawer = ({
                     </p>
                   </div>
                   {isActive && (
-                    <div className="w-2 h-8 bg-current rounded-full opacity-60"></div>
+                    <div className="w-2 h-8 bg-blue-500 dark:bg-blue-400 rounded-full"></div>
                   )}
                   {item.id === 'stock-analysis' && onBackToHoldings && (
                     <button
@@ -177,7 +179,7 @@ export const MobileNavDrawer = ({
                         onBackToHoldings()
                         setIsOpen(false)
                       }}
-                      className="ml-2 w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center text-xs"
+                      className="ml-2 w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors flex items-center justify-center text-xs"
                     >
                       ×
                     </button>
@@ -187,13 +189,6 @@ export const MobileNavDrawer = ({
             })}
           </div>
 
-          {/* Footer */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-white/20 dark:border-white/10">
-            <div className="text-center space-y-2">
-              <p className="text-white/70 text-sm">Portfolio Analyzer</p>
-              <p className="text-white/50 text-xs">Real-time investment insights</p>
-            </div>
-          </div>
         </div>
       </div>
     </>
