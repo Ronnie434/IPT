@@ -1,5 +1,6 @@
 import { Card, CardHeader } from '@/components/ui/card'
 import { DollarSign, TrendingUp, PieChart, Activity } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils'
 
 interface PortfolioData {
   total_equity?: number
@@ -29,7 +30,7 @@ export function PortfolioSummaryCards({ portfolioData }: PortfolioSummaryCardsPr
             <div className="text-xs font-medium text-blue-600 dark:text-blue-300 uppercase tracking-wide" id="total-equity">Total Equity</div>
           </div>
           <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:scale-105 transition-transform duration-300" aria-describedby="total-equity">
-            ${portfolioData.total_equity?.toFixed(2) || '0.00'}
+            {formatCurrency(portfolioData.total_equity)}
           </div>
           <p className="text-sm text-gray-600 dark:text-blue-300/80">Current portfolio value</p>
         </CardHeader>
@@ -45,7 +46,7 @@ export function PortfolioSummaryCards({ portfolioData }: PortfolioSummaryCardsPr
             <div className="text-xs font-medium text-emerald-600 dark:text-emerald-300 uppercase tracking-wide">Market Value</div>
           </div>
           <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:scale-105 transition-transform duration-300">
-            ${portfolioData.total_market_value?.toFixed(2) || '0.00'}
+            {formatCurrency(portfolioData.total_market_value)}
           </div>
           <p className="text-sm text-gray-600 dark:text-emerald-300/80">Total market value</p>
         </CardHeader>
@@ -77,7 +78,7 @@ export function PortfolioSummaryCards({ portfolioData }: PortfolioSummaryCardsPr
             <div className="text-xs font-medium text-amber-600 dark:text-amber-300 uppercase tracking-wide">Dividends</div>
           </div>
           <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2 group-hover:scale-105 transition-transform duration-300">
-            ${portfolioData.total_dividends?.toFixed(2) || '0.00'}
+            {formatCurrency(portfolioData.total_dividends)}
           </div>
           <p className="text-sm text-gray-600 dark:text-amber-300/80">Lifetime dividends earned</p>
         </CardHeader>

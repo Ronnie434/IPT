@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { TrendingUp } from 'lucide-react'
+import { formatCurrency, formatQuantity, formatDividendRate } from '@/lib/utils'
 
 interface StockAnalysisData {
   current_holding?: {
@@ -175,13 +176,13 @@ export function StockAnalysisTab({
                 <div className="p-4 bg-indigo-50 dark:bg-indigo-950/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
                   <p className="text-sm text-indigo-600 dark:text-indigo-400">Calculated Avg</p>
                   <p className="text-lg font-bold text-indigo-900 dark:text-indigo-100">
-                    ${stockAnalysisData.metrics.calculated_avg_price?.toFixed(2)}
+                    {formatCurrency(stockAnalysisData.metrics.calculated_avg_price)}
                   </p>
                 </div>
                 <div className="p-4 bg-teal-50 dark:bg-teal-950/20 rounded-lg border border-teal-200 dark:border-teal-800">
                   <p className="text-sm text-teal-600 dark:text-teal-400">Total Dividends</p>
                   <p className="text-lg font-bold text-teal-900 dark:text-teal-100">
-                    ${stockAnalysisData.metrics.total_dividend_amount?.toFixed(2)}
+                    {formatCurrency(stockAnalysisData.metrics.total_dividend_amount)}
                   </p>
                 </div>
               </div>
@@ -202,7 +203,7 @@ export function StockAnalysisTab({
                         }`}></div>
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">
-                            {order.side.toUpperCase()} {order.quantity} shares
+                            {order.side.toUpperCase()} {formatQuantity(order.quantity)} shares
                           </p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
                             {new Date(order.created_at).toLocaleDateString()} • {order.state}
@@ -211,10 +212,10 @@ export function StockAnalysisTab({
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-gray-900 dark:text-white">
-                          ${parseFloat(order.price).toFixed(2)}
+                          {formatCurrency(order.price)}
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          ${(parseFloat(order.price) * parseFloat(order.quantity)).toFixed(2)} total
+                          {formatCurrency(parseFloat(order.price) * parseFloat(order.quantity))} total
                         </p>
                       </div>
                     </div>
@@ -234,7 +235,7 @@ export function StockAnalysisTab({
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="font-medium text-gray-900 dark:text-white">
-                          ${parseFloat(dividend.amount).toFixed(2)}
+                          {formatCurrency(dividend.amount)}
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {new Date(dividend.paid_at || dividend.payable_date).toLocaleDateString()} • {dividend.state}
@@ -242,10 +243,10 @@ export function StockAnalysisTab({
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          ${parseFloat(dividend.rate).toFixed(4)} per share
+                          {formatDividendRate(dividend.rate)} per share
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {dividend.position} shares
+                          {formatQuantity(dividend.position)} shares
                         </p>
                       </div>
                     </div>

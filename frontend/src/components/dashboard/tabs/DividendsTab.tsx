@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Activity, DollarSign, PieChart, ChevronDown, ChevronUp } from 'lucide-react'
+import { formatCurrency, formatDividendRate, formatQuantity } from '@/lib/utils'
 
 interface DividendsTabProps {
   dividendsData: any[]
@@ -36,7 +37,7 @@ export function DividendsTab({
                   <div>
                     <p className="text-sm text-green-600 dark:text-green-400 font-medium">Total Dividends</p>
                     <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                      ${portfolioData?.total_dividends?.toFixed(2) || '0.00'}
+                      {formatCurrency(portfolioData?.total_dividends)}
                     </p>
                   </div>
                   <Activity className="h-8 w-8 text-green-500" />
@@ -117,10 +118,10 @@ export function DividendsTab({
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        ${parseFloat(dividend.amount).toFixed(2)}
+                        {formatCurrency(dividend.amount)}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        ${parseFloat(dividend.rate).toFixed(4)} per share
+                        {formatDividendRate(dividend.rate)} per share
                       </p>
                     </div>
                   </div>
@@ -128,7 +129,7 @@ export function DividendsTab({
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                     <div>
                       <p className="text-gray-500 dark:text-gray-400">Position</p>
-                      <p className="font-semibold text-gray-900 dark:text-white">{dividend.position} shares</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{formatQuantity(dividend.position)} shares</p>
                     </div>
                     <div>
                       <p className="text-gray-500 dark:text-gray-400">Record Date</p>

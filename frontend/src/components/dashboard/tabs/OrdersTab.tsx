@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DollarSign, Activity, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
+import { formatCurrency, formatQuantity } from '@/lib/utils'
 
 interface OrdersTabProps {
   ordersData: any[]
@@ -103,10 +104,10 @@ export function OrdersTab({
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                          ${parseFloat(order.price).toFixed(2)}
+                          {formatCurrency(order.price)}
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {order.quantity} shares
+                          {formatQuantity(order.quantity)} shares
                         </p>
                       </div>
                     </div>
@@ -131,7 +132,7 @@ export function OrdersTab({
                       <div>
                         <p className="text-gray-500 dark:text-gray-400">Total Value</p>
                         <p className="font-semibold text-gray-900 dark:text-white">
-                          ${(parseFloat(order.price) * parseFloat(order.quantity)).toFixed(2)}
+                          {formatCurrency(parseFloat(order.price) * parseFloat(order.quantity))}
                         </p>
                       </div>
                     </div>
@@ -188,10 +189,10 @@ export function OrdersTab({
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                          ${parseFloat(order.price).toFixed(2)}
+                          {formatCurrency(order.price)}
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {order.quantity} shares
+                          {formatQuantity(order.quantity)} shares
                         </p>
                       </div>
                     </div>
@@ -234,7 +235,7 @@ export function OrdersTab({
                       <div>
                         <p className="text-gray-500 dark:text-gray-400">Total Value</p>
                         <p className="font-semibold text-gray-900 dark:text-white">
-                          ${(parseFloat(order.price) * parseFloat(order.quantity)).toFixed(2)}
+                          {formatCurrency(parseFloat(order.price) * parseFloat(order.quantity))}
                         </p>
                       </div>
                     </div>

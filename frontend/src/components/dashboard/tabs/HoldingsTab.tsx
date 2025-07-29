@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { TrendingUp, ChevronDown, ChevronUp, BarChart3, MoreHorizontal, Info, Activity, DollarSign } from 'lucide-react'
+import { formatCurrency, formatQuantity, formatPercentage } from '@/lib/utils'
 
 interface HoldingsTabProps {
   holdingsData: any
@@ -66,7 +67,7 @@ export function HoldingsTab({
                             ? 'text-green-600 dark:text-green-400' 
                             : 'text-red-600 dark:text-red-400'
                         }`}>
-                          {parseFloat(holding.percent_change) >= 0 ? '+' : ''}{holding.percent_change}%
+                          {parseFloat(holding.percent_change) >= 0 ? '+' : ''}{formatPercentage(holding.percent_change)}
                         </p>
                       </div>
                     </div>
@@ -144,7 +145,7 @@ export function HoldingsTab({
                               <div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400">Total Investment</p>
                                 <p className="text-xl font-bold text-gray-900 dark:text-white">
-                                  ${(parseFloat(holding.average_buy_price) * parseFloat(holding.quantity)).toFixed(2)}
+                                  {formatCurrency(parseFloat(holding.average_buy_price) * parseFloat(holding.quantity))}
                                 </p>
                               </div>
                               <DollarSign className="h-5 w-5 text-blue-500" />
