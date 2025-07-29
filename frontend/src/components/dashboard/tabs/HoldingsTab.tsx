@@ -61,7 +61,7 @@ export function HoldingsTab({
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{holding.name || 'Stock'}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xl font-bold text-gray-900 dark:text-white">${holding.price}</p>
+                        <p className="text-xl font-bold text-gray-900 dark:text-white">{formatCurrency(holding.price)}</p>
                         <p className={`text-sm font-medium ${
                           parseFloat(holding.percent_change) >= 0 
                             ? 'text-green-600 dark:text-green-400' 
@@ -76,15 +76,15 @@ export function HoldingsTab({
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                         <p className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-wide">Quantity</p>
-                        <p className="text-lg font-bold text-blue-900 dark:text-blue-100">{holding.quantity}</p>
+                        <p className="text-lg font-bold text-blue-900 dark:text-blue-100">{formatQuantity(holding.quantity)}</p>
                       </div>
                       <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
                         <p className="text-xs text-green-600 dark:text-green-400 uppercase tracking-wide">Market Value</p>
-                        <p className="text-lg font-bold text-green-900 dark:text-green-100">${holding.market_value}</p>
+                        <p className="text-lg font-bold text-green-900 dark:text-green-100">{formatCurrency(holding.market_value)}</p>
                       </div>
                       <div className="text-center p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
                         <p className="text-xs text-purple-600 dark:text-purple-400 uppercase tracking-wide">Avg Cost</p>
-                        <p className="text-lg font-bold text-purple-900 dark:text-purple-100">${holding.average_buy_price}</p>
+                        <p className="text-lg font-bold text-purple-900 dark:text-purple-100">{formatCurrency(holding.average_buy_price)}</p>
                       </div>
                       <div className="text-center p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg">
                         <p className="text-xs text-amber-600 dark:text-amber-400 uppercase tracking-wide">Total Return</p>
@@ -93,7 +93,7 @@ export function HoldingsTab({
                             ? 'text-emerald-600 dark:text-emerald-400' 
                             : 'text-red-600 dark:text-red-400'
                         }`}>
-                          ${holding.total_return_today}
+                          {formatCurrency(holding.total_return_today)}
                         </p>
                       </div>
                     </div>
