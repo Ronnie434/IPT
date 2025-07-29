@@ -6,6 +6,9 @@ import { PortfolioSummaryCards } from './PortfolioSummaryCards'
 import { NavigationTabs } from './NavigationTabs'
 import { OverviewTab } from './tabs/OverviewTab'
 import { HoldingsTab } from './tabs/HoldingsTab'
+import { DividendsTab } from './tabs/DividendsTab'
+import { OrdersTab } from './tabs/OrdersTab'
+import { StockAnalysisTab } from './tabs/StockAnalysisTab'
 import { AccountInfo } from './sidebar/AccountInfo'
 import { QuickActions } from './sidebar/QuickActions'
 import { MarketInsights } from './sidebar/MarketInsights'
@@ -22,6 +25,12 @@ export function Dashboard({ setIsLoggedIn }: DashboardProps) {
   const [accountData, setAccountData] = useState<any>(null)
   const [userData, setUserData] = useState<any>(null)
   const [selectedStock, setSelectedStock] = useState<any>(null)
+  const [stockAnalysisData, setStockAnalysisData] = useState<any>(null)
+  const [dividendsData, setDividendsData] = useState<any>(null)
+  const [ordersData, setOrdersData] = useState<any>(null)
+  const [openOrdersData, setOpenOrdersData] = useState<any>(null)
+  const [showAllDividends, setShowAllDividends] = useState(false)
+  const [showAllOrders, setShowAllOrders] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
@@ -65,22 +74,19 @@ export function Dashboard({ setIsLoggedIn }: DashboardProps) {
       }
       
       if (dividendsDataResponse.success) {
-        // TODO: Use dividends data when DividendsTab is implemented
-        console.log('Dividends data loaded:', dividendsDataResponse.data)
+        setDividendsData(dividendsDataResponse.data)
       } else {
         console.warn('Failed to fetch dividends data:', dividendsDataResponse.message)
       }
       
       if (ordersDataResponse.success) {
-        // TODO: Use orders data when OrdersTab is implemented
-        console.log('Orders data loaded:', ordersDataResponse.data)
+        setOrdersData(ordersDataResponse.data)
       } else {
         console.warn('Failed to fetch orders data:', ordersDataResponse.message)
       }
       
       if (openOrdersDataResponse.success) {
-        // TODO: Use open orders data when OrdersTab is implemented
-        console.log('Open orders data loaded:', openOrdersDataResponse.data)
+        setOpenOrdersData(openOrdersDataResponse.data)
       } else {
         console.warn('Failed to fetch open orders data:', openOrdersDataResponse.message)
       }
@@ -171,8 +177,7 @@ export function Dashboard({ setIsLoggedIn }: DashboardProps) {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/stock/${symbol}`)
       const data = await response.json()
       if (data.success) {
-        // TODO: Use stock analysis data when StockAnalysisTab is implemented
-        console.log('Stock analysis data loaded for', symbol, data.data)
+        setStockAnalysisData(data.data)
         setSelectedStock(symbol)
         setActiveTab('stock-analysis')
       } else {
@@ -186,6 +191,7 @@ export function Dashboard({ setIsLoggedIn }: DashboardProps) {
 
   const handleBackToHoldings = () => {
     setSelectedStock(null)
+    setStockAnalysisData(null)
     setActiveTab('holdings')
   }
 
@@ -264,23 +270,30 @@ export function Dashboard({ setIsLoggedIn }: DashboardProps) {
               />
             )}
 
-            {/* TODO: Add other tabs when created */}
             {activeTab === 'dividends' && (
-              <div className="p-8 text-center text-gray-500">
-                Dividends tab component coming soon...
-              </div>
+              <DividendsTab
+                dividendsData={dividendsData}
+                portfolioData={portfolioData}
+                showAllDividends={showAllDividends}
+                onToggleShowAll={() => setShowAllDividends(!showAllDividends)}
+              />
             )}
 
             {activeTab === 'orders' && (
-              <div className="p-8 text-center text-gray-500">
-                Orders tab component coming soon...
-              </div>
+              <OrdersTab
+                ordersData={ordersData}
+                openOrdersData={openOrdersData}
+                showAllOrders={showAllOrders}
+                onToggleShowAll={() => setShowAllOrders(!showAllOrders)}
+              />
             )}
 
             {activeTab === 'stock-analysis' && (
-              <div className="p-8 text-center text-gray-500">
-                Stock analysis tab component coming soon...
-              </div>
+              <StockAnalysisTab
+                selectedStock={selectedStock}
+                stockAnalysisData={stockAnalysisData}
+                onBackToHoldings={handleBackToHoldings}
+              />
             )}
           </div>
           
