@@ -1,37 +1,33 @@
-'use client'
-
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { TrendingUp, Shield, RefreshCw, LogOut } from 'lucide-react'
 import { MobileNavDrawer } from '@/components/ui/mobile-nav-drawer'
-import { TrendingUp, RefreshCw, Shield, LogOut } from 'lucide-react'
-import { TabType } from '@/types/portfolio'
 
 interface DashboardHeaderProps {
+  activeTab: string
+  selectedStock: string | null
   onRefresh: () => void
   onClearSession: () => void
   onClearCache: () => void
   onLogout: () => void
-  activeTab: TabType
-  selectedStock: string | null
-  onTabChange: (tab: TabType) => void
+  onTabChange: (tab: string) => void
   onBackToHoldings: () => void
 }
 
 export function DashboardHeader({
+  activeTab,
+  selectedStock,
   onRefresh,
   onClearSession,
   onClearCache,
   onLogout,
-  activeTab,
-  selectedStock,
   onTabChange,
   onBackToHoldings
 }: DashboardHeaderProps) {
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/80 dark:bg-black/80 backdrop-blur-xl">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          {/* Logo and Title */}
+    <header className="sticky top-0 z-50 bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm" role="banner" aria-label="Site header">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
@@ -41,16 +37,19 @@ export function DashboardHeader({
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   Portfolio Analyzer
                 </h1>
-                {/* <p className="text-xs text-gray-500 dark:text-gray-300">Real-time insights</p> */}
               </div>
             </div>
           </div>
-
-          {/* Actions */}
           <div className="flex items-center space-x-3">
-            {/* Desktop Actions */}
-            <div className="hidden md:flex items-center space-x-2">
-              <Button
+            <ThemeToggle />
+            <MobileNavDrawer
+              activeTab={activeTab}
+              onTabChange={onTabChange}
+              selectedStock={selectedStock}
+              onBackToHoldings={onBackToHoldings}
+            />
+            <div className="hidden sm:flex items-center space-x-3">
+              <Button 
                 onClick={onRefresh}
                 variant="outline"
                 size="sm"
@@ -59,7 +58,7 @@ export function DashboardHeader({
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
-              <Button
+              <Button 
                 onClick={onClearSession}
                 variant="outline"
                 size="sm"
@@ -68,7 +67,7 @@ export function DashboardHeader({
               >
                 <Shield className="h-4 w-4" />
               </Button>
-              <Button
+              <Button 
                 onClick={onClearCache}
                 variant="outline"
                 size="sm"
@@ -77,7 +76,7 @@ export function DashboardHeader({
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
-              <Button
+              <Button 
                 onClick={onLogout}
                 variant="outline"
                 size="sm"
@@ -87,17 +86,6 @@ export function DashboardHeader({
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
-
-            {/* Theme Toggle */}
-            <ThemeToggle />
-
-            {/* Mobile Navigation */}
-            <MobileNavDrawer
-              activeTab={activeTab}
-              onTabChange={onTabChange}
-              selectedStock={selectedStock}
-              onBackToHoldings={onBackToHoldings}
-            />
           </div>
         </div>
       </div>
